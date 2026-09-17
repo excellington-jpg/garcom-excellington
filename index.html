@@ -1,0 +1,1170 @@
+﻿
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garçom Excellington - A conta, por favor!</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SheetJS for Excel Import -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-30 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            
+            <!-- Title, Subtitle, and Terms/Exit buttons below them -->
+            <div class="flex flex-col space-y-2">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-amber-500 p-2 rounded-xl text-slate-900 shadow-inner">
+                        <i data-lucide="utensils" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-tight text-white">Garçom Excellington</h1>
+                        <p class="text-xs text-amber-400 font-medium">A conta, por favor!</p>
+                    </div>
+                </div>
+                <!-- Terms and Exit action icons below title and subtitle -->
+                <div class="flex items-center space-x-2 pl-11">
+                    <button onclick="openModal('modal-terms')" title="Termos de Uso e Responsabilidade" class="px-3 py-1 bg-slate-900/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg border border-slate-700 transition flex items-center gap-1.5 text-xs font-medium">
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-400"></i> Termos de Uso
+                    </button>
+                    <button onclick="exitApp()" title="Sair do Aplicativo" class="px-3 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 rounded-lg border border-rose-500/30 transition flex items-center gap-1.5 text-xs font-medium">
+                        <i data-lucide="power" class="w-3.5 h-3.5"></i> Sair / Fechar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="flex bg-slate-900/80 p-1 rounded-xl border border-slate-700 overflow-x-auto max-w-full">
+                <button onclick="switchTab('orders')" id="btn-tab-orders" class="px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 whitespace-nowrap bg-amber-500 text-slate-900 shadow">
+                    <i data-lucide="clipboard-list" class="w-4 h-4"></i> Pedidos / Mesas
+                </button>
+                <button onclick="switchTab('menu')" id="btn-tab-menu" class="px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 whitespace-nowrap text-slate-300 hover:text-white">
+                    <i data-lucide="book-open" class="w-4 h-4"></i> Cardápio & Classes
+                </button>
+                <button onclick="switchTab('history')" id="btn-tab-history" class="px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 whitespace-nowrap text-slate-300 hover:text-white">
+                    <i data-lucide="history" class="w-4 h-4"></i> Histórico
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 pb-24">
+
+        <!-- TAB 1: PEDIDOS E MESAS -->
+        <div id="tab-orders" class="space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-800/60 p-4 rounded-2xl border border-slate-700/60 backdrop-blur">
+                <div>
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i data-lucide="users" class="text-amber-400 w-5 h-5"></i> Comandas e Mesas Abertas
+                    </h2>
+                    <p class="text-sm text-slate-400">Atenda múltiplos clientes simultaneamente e calcule a conta com taxa de serviço.</p>
+                </div>
+                <button onclick="openNewOrderModal()" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold px-5 py-2.5 rounded-xl shadow-lg transition flex items-center gap-2 active:scale-95">
+                    <i data-lucide="plus-circle" class="w-5 h-5"></i> Nova Comanda / Mesa
+                </button>
+            </div>
+
+            <!-- Active Orders Grid -->
+            <div id="active-orders-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <!-- Injected via JavaScript -->
+            </div>
+        </div>
+
+        <!-- TAB 2: CARDÁPIO E CLASSES -->
+        <div id="tab-menu" class="hidden space-y-6">
+            <!-- Configuration / Service Fee & Excel Import -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Service Fee Box -->
+                <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-white flex items-center gap-2 mb-2">
+                            <i data-lucide="percent" class="text-amber-400 w-5 h-5"></i> Taxa de Serviço
+                        </h3>
+                        <p class="text-xs text-slate-400 mb-4">Defina o percentual aplicado automaticamente em cada comanda (ex: 10%).</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <input type="number" id="service-fee-input" min="0" max="100" step="0.5" class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white w-32 focus:outline-none focus:border-amber-400 text-lg font-bold" placeholder="10">
+                        <span class="text-slate-300 font-bold text-lg">%</span>
+                        <button onclick="saveServiceFee()" class="bg-slate-700 hover:bg-slate-600 text-white font-medium px-4 py-2.5 rounded-xl transition flex-1">Salvar Taxa</button>
+                    </div>
+                </div>
+
+                <!-- Excel Import Box -->
+                <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-lg lg:col-span-2 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-white flex items-center gap-2 mb-2">
+                            <i data-lucide="file-spreadsheet" class="text-emerald-400 w-5 h-5"></i> Importar Cardápio via Excel
+                        </h3>
+                        <p class="text-xs text-slate-400 mb-4">Envie um arquivo Excel (.xlsx, .xls) ou CSV contendo as colunas: <code class="text-amber-300 bg-slate-900 px-1.5 py-0.5 rounded">Código, Tipo, Nome, Valor</code>.</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <label class="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow">
+                            <i data-lucide="upload" class="w-4 h-4"></i> Escolher Arquivo Excel
+                            <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelImport(event)">
+                        </label>
+                        <button onclick="downloadExcelTemplate()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-medium px-3 py-2.5 rounded-xl transition flex items-center gap-1.5">
+                            <i data-lucide="download" class="w-4 h-4"></i> Baixar Planilha Exemplo (Com Itens Padrão)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories Management Section (Button above text box) -->
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-lg">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+                            <i data-lucide="tags" class="text-amber-400 w-5 h-5"></i> Gerenciamento de Classes / Tipos
+                        </h3>
+                        <p class="text-xs text-slate-400">Adicione, edite ou exclua classificações de itens (ex: Prato, Bebida, Sobremesa, Outros).</p>
+                    </div>
+                    <div class="flex flex-col gap-2 w-full sm:w-64">
+                        <button onclick="addCategory()" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold px-4 py-2 rounded-xl text-sm transition shadow flex items-center justify-center gap-1.5">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Adicionar Classe
+                        </button>
+                        <input type="text" id="new-category-name" placeholder="Nova classe (ex: Porções)" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400 w-full">
+                    </div>
+                </div>
+                <div id="categories-badge-container" class="flex flex-wrap gap-2 pt-2 border-t border-slate-700">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+
+            <!-- Menu Items Section -->
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-lg space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+                            <i data-lucide="utensils-crossed" class="text-amber-400 w-5 h-5"></i> Itens do Cardápio
+                        </h3>
+                        <p class="text-xs text-slate-400">Cadastre e gerencie os produtos disponíveis para pedidos.</p>
+                    </div>
+                    <button onclick="openMenuItemModal()" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold px-4 py-2 rounded-xl text-sm transition flex items-center gap-2 shadow">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Novo Item
+                    </button>
+                </div>
+
+                <!-- Search Menu -->
+                <div class="relative">
+                    <i data-lucide="search" class="absolute left-3.5 top-3 text-slate-400 w-4 h-4"></i>
+                    <input type="text" id="menu-search" oninput="renderMenuTable()" placeholder="Buscar por código, nome ou tipo..." class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400">
+                </div>
+
+                <!-- Menu Table -->
+                <div class="overflow-x-auto rounded-xl border border-slate-700">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-900/80 text-slate-400 text-xs font-semibold uppercase tracking-wider border-b border-slate-700">
+                                <th class="p-3">Código</th>
+                                <th class="p-3">Nome do Item</th>
+                                <th class="p-3">Tipo / Classe</th>
+                                <th class="p-3">Valor (R$)</th>
+                                <th class="p-3 text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="menu-table-body" class="divide-y divide-slate-700 text-sm">
+                            <!-- Injected via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: HISTÓRICO DE PEDIDOS -->
+        <div id="tab-history" class="hidden space-y-6">
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i data-lucide="history" class="text-amber-400 w-5 h-5"></i> Histórico de Comandas Fechadas
+                    </h2>
+                    <p class="text-sm text-slate-400">Consulte comandas finalizadas e o faturamento registrado.</p>
+                </div>
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <input type="text" id="history-search" oninput="renderHistory()" placeholder="Filtrar por mesa ou cliente..." class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400 w-full sm:w-60">
+                </div>
+            </div>
+
+            <div id="history-orders-list" class="space-y-4">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODAL: Terms of Use and Responsibility -->
+    <div id="modal-terms" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i data-lucide="shield-check" class="text-amber-400 w-5 h-5"></i> Termos de Uso e Responsabilidade
+                </h3>
+                <button onclick="closeModal('modal-terms')" class="text-slate-400 hover:text-white p-1 rounded-lg"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="space-y-3 text-sm text-slate-300 leading-relaxed">
+                <p><strong>1. Armazenamento Local:</strong> Todo o armazenamento de dados deste aplicativo (cardápio, classes, comandas ativas e histórico) ocorre exclusivamente no dispositivo do usuário através da tecnologia <code>localStorage</code> do navegador.</p>
+                <p><strong>2. Privacidade e Segurança:</strong> Nenhum dado comercial, pessoal ou de faturamento é transmitido ou armazenado em servidores externos. O aplicativo opera de forma totalmente independente no seu aparelho.</p>
+                <p><strong>3. Responsabilidade por Backups:</strong> Como os dados residem na memória do navegador, a limpeza de dados de navegação, uso de modo anônimo ou troca de aparelho pode resultar na perda das informações cadastradas. Recomenda-se manter planilhas de backup atualizadas.</p>
+                <p><strong>4. Precisão Operacional:</strong> Os cálculos de taxas de serviço e subtotais são auxiliares. O usuário é responsável por conferir os valores finais exibidos aos clientes.</p>
+            </div>
+            <div class="flex justify-end pt-2">
+                <button onclick="closeModal('modal-terms')" class="bg-amber-500 hover:bg-amber-400 text-slate-900 px-5 py-2 rounded-xl text-sm font-bold transition shadow">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: New / Edit Order -->
+    <div id="modal-order" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 id="order-modal-title" class="text-lg font-bold text-white flex items-center gap-2">
+                    <i data-lucide="plus-circle" class="text-amber-400 w-5 h-5"></i> Abrir Nova Comanda
+                </h3>
+                <button onclick="closeModal('modal-order')" class="text-slate-400 hover:text-white p-1 rounded-lg"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form id="form-order" onsubmit="saveOrderModal(event)" class="space-y-4">
+                <input type="hidden" id="order-id-edit">
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Identificação (Mesa ou Nome do Cliente)*</label>
+                    <input type="text" id="order-table-client" required placeholder="Ex: Mesa 04 ou João Silva" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400">
+                </div>
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeModal('modal-order')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-4 py-2 rounded-xl text-sm font-medium transition">Cancelar</button>
+                    <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-slate-900 px-5 py-2 rounded-xl text-sm font-bold transition shadow">Salvar Comanda</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: Order Details / Add Items with Category Filtering -->
+    <div id="modal-order-details" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-5 border-b border-slate-700 flex justify-between items-center bg-slate-900/60">
+                <div>
+                    <h3 id="details-modal-title" class="text-lg font-bold text-white">Detalhes da Comanda</h3>
+                    <p id="details-modal-subtitle" class="text-xs text-slate-400"></p>
+                </div>
+                <button onclick="closeModal('modal-order-details')" class="text-slate-400 hover:text-white p-1 rounded-lg"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-5 overflow-y-auto space-y-5 flex-1">
+                <!-- Add Item Form with Category Selector First -->
+                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60 space-y-3">
+                    <h4 class="text-sm font-semibold text-amber-400 flex items-center gap-1.5">
+                        <i data-lucide="plus-circle" class="w-4 h-4"></i> Adicionar Item ao Pedido
+                    </h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">1. Selecionar Classe / Tipo:</label>
+                            <select id="select-category-filter" onchange="filterMenuItemsByCategory()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400">
+                                <!-- Loaded via JS -->
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">2. Selecionar Item:</label>
+                            <select id="select-menu-item" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400">
+                                <!-- Loaded via JS based on category -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-2 pt-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-slate-400">Qtd:</span>
+                            <input type="number" id="select-item-qty" min="1" value="1" class="w-16 bg-slate-800 border border-slate-700 rounded-xl px-2 py-1.5 text-sm text-white text-center focus:outline-none focus:border-amber-400">
+                        </div>
+                        <button type="button" onclick="addItemToCurrentOrder()" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold px-5 py-2 rounded-xl text-sm transition shadow">Adicionar ao Pedido</button>
+                    </div>
+                </div>
+
+                <!-- Items list in order -->
+                <div>
+                    <h4 class="text-sm font-semibold text-slate-300 mb-3">Itens Registrados</h4>
+                    <div class="overflow-x-auto rounded-xl border border-slate-700">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-900/60 text-slate-400 text-xs font-semibold border-b border-slate-700">
+                                    <th class="p-3">Item</th>
+                                    <th class="p-3">Qtd</th>
+                                    <th class="p-3">Unitário</th>
+                                    <th class="p-3">Subtotal</th>
+                                    <th class="p-3 text-right">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="order-items-tbody" class="divide-y divide-slate-700 text-sm">
+                                <!-- Injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Calculation summary -->
+                <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 space-y-2 text-sm">
+                    <div class="flex justify-between text-slate-300">
+                        <span>Subtotal dos Itens:</span>
+                        <span id="order-subtotal" class="font-medium text-white">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between text-slate-300">
+                        <span>Taxa de Serviço (<span id="order-service-fee-pct">10</span>%):</span>
+                        <span id="order-service-fee-val" class="font-medium text-white">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between text-base font-bold text-amber-400 pt-2 border-t border-slate-800">
+                        <span>Total Geral com Serviço:</span>
+                        <span id="order-grand-total">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t border-slate-700 bg-slate-900/60 flex flex-wrap justify-between items-center gap-2">
+                <div class="flex gap-2">
+                    <button onclick="printOrderReceipt()" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-1.5">
+                        <i data-lucide="printer" class="w-4 h-4"></i> Imprimir
+                    </button>
+                    <button onclick="shareOrderWhatsApp()" class="bg-emerald-600/30 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/30 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-1.5">
+                        <i data-lucide="share-2" class="w-4 h-4"></i> Compartilhar
+                    </button>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="closeModal('modal-order-details')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition">Fechar</button>
+                    <button id="btn-close-bill" onclick="finalizeCurrentOrder()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-xs sm:text-sm transition shadow flex items-center gap-1.5">
+                        <i data-lucide="check-circle" class="w-4 h-4"></i> Fechar Conta
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: New / Edit Menu Item -->
+    <div id="modal-menu-item" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 id="menu-modal-title" class="text-lg font-bold text-white flex items-center gap-2">
+                    <i data-lucide="plus" class="text-amber-400 w-5 h-5"></i> Cadastrar Item no Cardápio
+                </h3>
+                <button onclick="closeModal('modal-menu-item')" class="text-slate-400 hover:text-white p-1 rounded-lg"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form id="form-menu-item" onsubmit="saveMenuItemModal(event)" class="space-y-4">
+                <input type="hidden" id="menu-edit-index">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Código*</label>
+                        <input type="text" id="item-code" required placeholder="Ex: P01" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Valor (R$)*</label>
+                        <input type="number" id="item-price" step="0.01" min="0" required placeholder="0.00" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Nome do Item*</label>
+                    <input type="text" id="item-name" required placeholder="Ex: Filé Parmegiana" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Tipo / Classe*</label>
+                    <select id="item-category" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400">
+                        <!-- Loaded via JS -->
+                    </select>
+                </div>
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeModal('modal-menu-item')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-4 py-2 rounded-xl text-sm font-medium transition">Cancelar</button>
+                    <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-slate-900 px-5 py-2 rounded-xl text-sm font-bold transition shadow">Salvar Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-800 border border-slate-700 text-white px-4 py-3 rounded-xl shadow-2xl z-50 flex items-center gap-3 transition-all duration-300 translate-y-20 opacity-0 pointer-events-none">
+        <div id="toast-icon" class="text-amber-400"></div>
+        <div id="toast-message" class="text-sm font-medium"></div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        const STORAGE_KEY = 'exc_garcom_state_v3';
+
+        let state = {
+            serviceFee: 10,
+            categories: ['Prato', 'Bebida', 'Sobremesa', 'Outros'],
+            menu: [], // Starts strictly empty for new users
+            orders: [], // Active and completed orders
+            currentDetailOrderId: null
+        };
+
+        // Load State from LocalStorage
+        function loadState() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    state.serviceFee = parsed.serviceFee ?? 10;
+                    state.categories = parsed.categories ?? ['Prato', 'Bebida', 'Sobremesa', 'Outros'];
+                    state.menu = parsed.menu ?? [];
+                    state.orders = parsed.orders ?? [];
+                } catch (e) {
+                    console.error("Erro ao carregar localStorage", e);
+                }
+            } else {
+                state.menu = [];
+            }
+            document.getElementById('service-fee-input').value = state.serviceFee;
+        }
+
+        // Save State to LocalStorage
+        function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        // Initialize Lucide icons and app on load
+        window.onload = function() {
+            loadState();
+            lucide.createIcons();
+            renderAll();
+        };
+
+        function renderAll() {
+            renderOrdersGrid();
+            renderCategoriesManager();
+            renderMenuTable();
+            renderHistory();
+            lucide.createIcons();
+        }
+
+        // Tab Switching
+        function switchTab(tabId) {
+            ['orders', 'menu', 'history'].forEach(id => {
+                const el = document.getElementById(`tab-${id}`);
+                const btn = document.getElementById(`btn-tab-${id}`);
+                if (id === tabId) {
+                    el.classList.remove('hidden');
+                    btn.className = "px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 whitespace-nowrap bg-amber-500 text-slate-900 shadow";
+                } else {
+                    el.classList.add('hidden');
+                    btn.className = "px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 whitespace-nowrap text-slate-300 hover:text-white";
+                }
+            });
+            lucide.createIcons();
+        }
+
+        // Toast notification helper
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            const msg = document.getElementById('toast-message');
+
+            msg.textContent = message;
+            icon.innerHTML = type === 'success' 
+                ? '<i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>' 
+                : '<i data-lucide="alert-circle" class="w-5 h-5 text-rose-400"></i>';
+            
+            lucide.createIcons();
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // Modals helper
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); lucide.createIcons(); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        // Exit application function
+        function exitApp() {
+            if (confirm("Deseja realmente sair e encerrar a sessão do Garçom Excellington?")) {
+                try {
+                    window.close();
+                } catch (e) {
+                    console.log(e);
+                }
+                document.body.innerHTML = `
+                    <div class="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6 text-center space-y-4">
+                        <div class="bg-amber-500/10 p-4 rounded-full text-amber-400 border border-amber-500/30">
+                            <i data-lucide="power" class="w-12 h-12"></i>
+                        </div>
+                        <h1 class="text-2xl font-bold text-white">Sessão Encerrada</h1>
+                        <p class="text-slate-400 max-w-md">O aplicativo "Garçom Excellington" foi encerrado com segurança. Você já pode fechar esta aba do navegador com tranquilidade.</p>
+                        <button onclick="location.reload()" class="bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 px-5 py-2.5 rounded-xl text-sm font-semibold transition">
+                            Reabrir Aplicativo
+                        </button>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
+        }
+
+        // --- CATEGORIES MANAGEMENT ---
+        function renderCategoriesManager() {
+            const container = document.getElementById('categories-badge-container');
+            const selectItemCat = document.getElementById('item-category');
+            
+            if (container) container.innerHTML = '';
+            if (selectItemCat) selectItemCat.innerHTML = '';
+
+            state.categories.forEach((cat, index) => {
+                // Badge in manager
+                if (container) {
+                    const badge = document.createElement('div');
+                    badge.className = "bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-xl flex items-center gap-2 text-sm text-slate-200";
+                    badge.innerHTML = `
+                        <span>${cat}</span>
+                        <button onclick="editCategory(${index})" class="text-slate-400 hover:text-amber-400 p-0.5"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button>
+                        <button onclick="deleteCategory(${index})" class="text-slate-400 hover:text-rose-400 p-0.5"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                    `;
+                    container.appendChild(badge);
+                }
+
+                // Option in menu modal select
+                if (selectItemCat) {
+                    const opt = document.createElement('option');
+                    opt.value = cat;
+                    opt.textContent = cat;
+                    selectItemCat.appendChild(opt);
+                }
+            });
+            lucide.createIcons();
+        }
+
+        function addCategory() {
+            const input = document.getElementById('new-category-name');
+            const name = input.value.trim();
+            if (!name) return showToast('Digite o nome da classe.', 'error');
+            if (state.categories.includes(name)) return showToast('Esta classe já existe.', 'error');
+
+            state.categories.push(name);
+            input.value = '';
+            saveState();
+            renderCategoriesManager();
+            showToast('Classe adicionada com sucesso!');
+        }
+
+        function editCategory(index) {
+            const oldName = state.categories[index];
+            const newName = prompt('Editar nome da classe:', oldName);
+            if (newName && newName.trim() !== '' && newName.trim() !== oldName) {
+                const trimmed = newName.trim();
+                if (state.categories.includes(trimmed)) return showToast('Essa classe já existe.', 'error');
+                
+                state.categories[index] = trimmed;
+                state.menu.forEach(item => {
+                    if (item.category === oldName) item.category = trimmed;
+                });
+                saveState();
+                renderAll();
+                showToast('Classe atualizada com sucesso!');
+            }
+        }
+
+        function deleteCategory(index) {
+            const cat = state.categories[index];
+            if (state.categories.length <= 1) return showToast('Mantenha pelo menos uma classe.', 'error');
+            if (confirm(`Deseja excluir a classe "${cat}"? Itens vinculados passarão para "Outros".`)) {
+                state.categories.splice(index, 1);
+                if (!state.categories.includes('Outros')) state.categories.push('Outros');
+                state.menu.forEach(item => {
+                    if (item.category === cat) item.category = 'Outros';
+                });
+                saveState();
+                renderAll();
+                showToast('Classe excluída com sucesso!');
+            }
+        }
+
+        // --- MENU ITEMS MANAGEMENT ---
+        function saveServiceFee() {
+            const val = parseFloat(document.getElementById('service-fee-input').value);
+            if (isNaN(val) || val < 0) return showToast('Valor de taxa inválido.', 'error');
+            state.serviceFee = val;
+            saveState();
+            showToast('Taxa de serviço atualizada!');
+        }
+
+        function renderMenuTable() {
+            const tbody = document.getElementById('menu-table-body');
+            const search = document.getElementById('menu-search').value.toLowerCase();
+            tbody.innerHTML = '';
+
+            const filtered = state.menu.filter(i => 
+                i.code.toLowerCase().includes(search) || 
+                i.name.toLowerCase().includes(search) || 
+                i.category.toLowerCase().includes(search)
+            );
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">Nenhum item cadastrado no cardápio. Importe via Excel ou adicione manualmente.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach((item) => {
+                const realIndex = state.menu.findIndex(m => m.code === item.code);
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-700/40 transition";
+                tr.innerHTML = `
+                    <td class="p-3 font-mono font-medium text-amber-400">${item.code}</td>
+                    <td class="p-3 font-medium text-white">${item.name}</td>
+                    <td class="p-3"><span class="bg-slate-900 border border-slate-700 px-2.5 py-1 rounded-lg text-xs text-slate-300">${item.category}</span></td>
+                    <td class="p-3 font-semibold text-emerald-400">R$ ${item.price.toFixed(2)}</td>
+                    <td class="p-3 text-right space-x-1">
+                        <button onclick="openMenuItemModal(${realIndex})" class="p-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg text-slate-300 hover:text-white transition"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                        <button onclick="deleteMenuItem(${realIndex})" class="p-1.5 bg-rose-500/20 hover:bg-rose-500/30 rounded-lg text-rose-400 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            lucide.createIcons();
+        }
+
+        function openMenuItemModal(index = null) {
+            renderCategoriesManager();
+            document.getElementById('menu-edit-index').value = index !== null ? index : '';
+            if (index !== null) {
+                const item = state.menu[index];
+                document.getElementById('menu-modal-title').innerHTML = `<i data-lucide="edit" class="text-amber-400 w-5 h-5"></i> Editar Item do Cardápio`;
+                document.getElementById('item-code').value = item.code;
+                document.getElementById('item-name').value = item.name;
+                document.getElementById('item-category').value = item.category;
+                document.getElementById('item-price').value = item.price;
+            } else {
+                document.getElementById('menu-modal-title').innerHTML = `<i data-lucide="plus" class="text-amber-400 w-5 h-5"></i> Cadastrar Item no Cardápio`;
+                document.getElementById('form-menu-item').reset();
+            }
+            openModal('modal-menu-item');
+        }
+
+        function saveMenuItemModal(e) {
+            e.preventDefault();
+            const editIdx = document.getElementById('menu-edit-index').value;
+            const code = document.getElementById('item-code').value.trim();
+            const name = document.getElementById('item-name').value.trim();
+            const category = document.getElementById('item-category').value;
+            const price = parseFloat(document.getElementById('item-price').value);
+
+            if (editIdx === '') {
+                if (state.menu.some(m => m.code.toLowerCase() === code.toLowerCase())) {
+                    return showToast('Já existe um item com este código.', 'error');
+                }
+                state.menu.push({ code, name, category, price });
+                showToast('Item cadastrado com sucesso!');
+            } else {
+                state.menu[editIdx] = { code, name, category, price };
+                showToast('Item atualizado com sucesso!');
+            }
+
+            saveState();
+            closeModal('modal-menu-item');
+            renderAll();
+        }
+
+        function deleteMenuItem(index) {
+            if (confirm(`Deseja excluir o item "${state.menu[index].name}"?`)) {
+                state.menu.splice(index, 1);
+                saveState();
+                renderAll();
+                showToast('Item excluído com sucesso!');
+            }
+        }
+
+        // --- EXCEL IMPORT / TEMPLATE ---
+        function downloadExcelTemplate() {
+            const templateData = [
+                { Código: "P01", Tipo: "Prato", Nome: "Filé Parmegiana com Fritas", Valor: 68.90 },
+                { Código: "P02", Tipo: "Prato", Nome: "Picanha ao Forno", Valor: 89.90 },
+                { Código: "B01", Tipo: "Bebida", Nome: "Refrigerante Lata 350ml", Valor: 7.50 },
+                { Código: "B02", Tipo: "Bebida", Nome: "Suco Natural de Laranja", Valor: 9.00 },
+                { Código: "S01", Tipo: "Sobremesa", Nome: "Pudim de Leite Condensado", Valor: 12.00 },
+                { Código: "O01", Tipo: "Outros", Nome: "Água Mineral 500ml", Valor: 5.00 }
+            ];
+            const worksheet = XLSX.utils.json_to_sheet(templateData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Cardapio");
+            XLSX.writeFile(workbook, "Modelo_Cardapio_Garcom_Excellington.xlsx");
+        }
+
+        function handleExcelImport(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const data = new Uint8Array(evt.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const json = XLSX.utils.sheet_to_json(worksheet);
+
+                    let importedCount = 0;
+                    json.forEach(row => {
+                        const code = String(row['Código'] || row['Codigo'] || row['code'] || '').trim();
+                        const type = String(row['Tipo'] || row['tipo'] || row['category'] || 'Outros').trim();
+                        const name = String(row['Nome'] || row['nome'] || row['name'] || '').trim();
+                        const price = parseFloat(row['Valor'] || row['valor'] || row['Preço'] || row['preco'] || 0);
+
+                        if (code && name && !isNaN(price)) {
+                            if (!state.categories.includes(type)) {
+                                state.categories.push(type);
+                            }
+                            const existingIndex = state.menu.findIndex(m => m.code.toLowerCase() === code.toLowerCase());
+                            if (existingIndex >= 0) {
+                                state.menu[existingIndex] = { code, name, category: type, price };
+                            } else {
+                                state.menu.push({ code, name, category: type, price });
+                            }
+                            importedCount++;
+                        }
+                    });
+
+                    saveState();
+                    renderAll();
+                    showToast(`Importação concluída! ${importedCount} itens carregados.`);
+                } catch (err) {
+                    console.error(err);
+                    showToast('Erro ao processar arquivo Excel.', 'error');
+                }
+                e.target.value = '';
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // --- ORDERS MANAGEMENT ---
+        function openNewOrderModal() {
+            document.getElementById('form-order').reset();
+            document.getElementById('order-id-edit').value = '';
+            document.getElementById('order-modal-title').innerHTML = `<i data-lucide="plus-circle" class="text-amber-400 w-5 h-5"></i> Abrir Nova Comanda`;
+            openModal('modal-order');
+        }
+
+        function saveOrderModal(e) {
+            e.preventDefault();
+            const tableClient = document.getElementById('order-table-client').value.trim();
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('pt-BR');
+            const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+            const newOrder = {
+                id: 'ORD-' + Date.now(),
+                tableOrClient: tableClient,
+                date: dateStr,
+                time: timeStr,
+                items: [],
+                status: 'aberto'
+            };
+
+            state.orders.unshift(newOrder);
+            saveState();
+            closeModal('modal-order');
+            renderOrdersGrid();
+            showToast(`Comanda para "${tableClient}" aberta com sucesso!`);
+            openOrderDetails(newOrder.id);
+        }
+
+        function renderOrdersGrid() {
+            const grid = document.getElementById('active-orders-grid');
+            grid.innerHTML = '';
+
+            const activeOrders = state.orders.filter(o => o.status === 'aberto');
+
+            if (activeOrders.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full bg-slate-800/40 border border-slate-700/60 rounded-2xl p-10 text-center space-y-3">
+                        <div class="inline-flex bg-slate-800 p-3 rounded-full text-amber-400"><i data-lucide="coffee" class="w-8 h-8"></i></div>
+                        <p class="text-slate-300 font-medium">Nenhuma comanda aberta no momento.</p>
+                        <p class="text-xs text-slate-500">Clique em "Nova Comanda / Mesa" para começar a anotar pedidos.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            activeOrders.forEach(order => {
+                const subtotal = order.items.reduce((acc, i) => acc + (i.price * i.quantity), 0);
+                const serviceFeeVal = subtotal * (state.serviceFee / 100);
+                const grandTotal = subtotal + serviceFeeVal;
+
+                const card = document.createElement('div');
+                card.className = "bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-lg hover:border-amber-500/50 transition flex flex-col justify-between space-y-4";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start gap-2 mb-2">
+                            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                                <i data-lucide="hash" class="text-amber-400 w-4 h-4"></i> ${order.tableOrClient}
+                            </h3>
+                            <span class="bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs px-2.5 py-1 rounded-full font-medium">Aberto</span>
+                        </div>
+                        <p class="text-xs text-slate-400 flex items-center gap-1.5 mb-3">
+                            <i data-lucide="clock" class="w-3.5 h-3.5"></i> Aberto às ${order.time} (${order.date})
+                        </p>
+                        <div class="bg-slate-900/60 rounded-xl p-3 border border-slate-700/60 text-xs space-y-1 mb-3 max-h-32 overflow-y-auto">
+                            ${order.items.length === 0 ? '<span class="text-slate-500 italic">Nenhum item adicionado ainda.</span>' : 
+                                order.items.map(i => `<div class="flex justify-between text-slate-300"><span>${i.quantity}x ${i.name}</span> <span class="font-medium">R$ ${(i.price * i.quantity).toFixed(2)}</span></div>`).join('')}
+                        </div>
+                    </div>
+                    <div class="space-y-3 pt-2 border-t border-slate-700">
+                        <div class="flex justify-between text-sm font-semibold">
+                            <span class="text-slate-400">Total com Taxa (${state.serviceFee}%):</span>
+                            <span class="text-amber-400 text-base">R$ ${grandTotal.toFixed(2)}</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="openOrderDetails('${order.id}')" class="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold py-2 px-3 rounded-xl text-sm transition flex items-center justify-center gap-1.5 shadow">
+                                <i data-lucide="plus-circle" class="w-4 h-4"></i> Pedido / Itens
+                            </button>
+                            <button onclick="deleteOrder('${order.id}')" class="bg-slate-700 hover:bg-rose-500/20 text-slate-300 hover:text-rose-400 p-2 rounded-xl transition" title="Excluir Comanda">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function openOrderDetails(orderId) {
+            state.currentDetailOrderId = orderId;
+            const order = state.orders.find(o => o.id === orderId);
+            if (!order) return;
+
+            document.getElementById('details-modal-title').textContent = `Comanda: ${order.tableOrClient}`;
+            document.getElementById('details-modal-subtitle').textContent = `Aberto em ${order.date} às ${order.time}`;
+            
+            renderCategoryFilterOptions();
+            renderOrderItemsTable(order);
+            openModal('modal-order-details');
+        }
+
+        function renderCategoryFilterOptions() {
+            const catSelect = document.getElementById('select-category-filter');
+            catSelect.innerHTML = '';
+            
+            state.categories.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                catSelect.appendChild(opt);
+            });
+
+            filterMenuItemsByCategory();
+        }
+
+        function filterMenuItemsByCategory() {
+            const catSelect = document.getElementById('select-category-filter');
+            const itemSelect = document.getElementById('select-menu-item');
+            const selectedCat = catSelect.value;
+
+            itemSelect.innerHTML = '';
+            const filteredItems = state.menu.filter(m => m.category === selectedCat);
+
+            if (filteredItems.length === 0) {
+                itemSelect.innerHTML = '<option value="">Nenhum item nesta classe</option>';
+                return;
+            }
+
+            filteredItems.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.code;
+                opt.textContent = `[${item.code}] ${item.name} - R$ ${item.price.toFixed(2)}`;
+                itemSelect.appendChild(opt);
+            });
+        }
+
+        function addItemToCurrentOrder() {
+            const order = state.orders.find(o => o.id === state.currentDetailOrderId);
+            if (!order) return;
+
+            const code = document.getElementById('select-menu-item').value;
+            const qty = parseInt(document.getElementById('select-item-qty').value);
+            if (!code || isNaN(qty) || qty <= 0) return showToast('Selecione um item válido e quantidade.', 'error');
+
+            const menuItem = state.menu.find(m => m.code === code);
+            if (!menuItem) return showToast('Item não encontrado no cardápio.', 'error');
+
+            const existing = order.items.find(i => i.code === code);
+            if (existing) {
+                existing.quantity += qty;
+            } else {
+                order.items.push({
+                    code: menuItem.code,
+                    name: menuItem.name,
+                    price: menuItem.price,
+                    quantity: qty
+                });
+            }
+
+            document.getElementById('select-item-qty').value = 1;
+            saveState();
+            renderOrderItemsTable(order);
+            renderOrdersGrid();
+            showToast('Item adicionado à comanda!');
+        }
+
+        function updateOrderQuantity(code, delta) {
+            const order = state.orders.find(o => o.id === state.currentDetailOrderId);
+            if (!order) return;
+
+            const item = order.items.find(i => i.code === code);
+            if (item) {
+                item.quantity += delta;
+                if (item.quantity <= 0) {
+                    order.items = order.items.filter(i => i.code !== code);
+                }
+                saveState();
+                renderOrderItemsTable(order);
+                renderOrdersGrid();
+            }
+        }
+
+        function removeOrderItem(code) {
+            const order = state.orders.find(o => o.id === state.currentDetailOrderId);
+            if (!order) return;
+
+            order.items = order.items.filter(i => i.code !== code);
+            saveState();
+            renderOrderItemsTable(order);
+            renderOrdersGrid();
+            showToast('Item removido do pedido.');
+        }
+
+        function renderOrderItemsTable(order) {
+            const tbody = document.getElementById('order-items-tbody');
+            tbody.innerHTML = '';
+
+            if (order.items.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">Nenhum item adicionado nesta comanda.</td></tr>`;
+            } else {
+                order.items.forEach(item => {
+                    const sub = item.price * item.quantity;
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-700/40 transition";
+                    tr.innerHTML = `
+                        <td class="p-3 font-medium text-white">${item.name} <span class="text-xs text-slate-500 font-mono">(${item.code})</span></td>
+                        <td class="p-3">
+                            <div class="flex items-center gap-2">
+                                <button onclick="updateOrderQuantity('${item.code}', -1)" class="w-6 h-6 bg-slate-700 hover:bg-slate-600 rounded flex items-center justify-center text-white font-bold">-</button>
+                                <span class="font-semibold text-white w-6 text-center">${item.quantity}</span>
+                                <button onclick="updateOrderQuantity('${item.code}', 1)" class="w-6 h-6 bg-slate-700 hover:bg-slate-600 rounded flex items-center justify-center text-white font-bold">+</button>
+                            </div>
+                        </td>
+                        <td class="p-3 text-slate-300">R$ ${item.price.toFixed(2)}</td>
+                        <td class="p-3 font-semibold text-emerald-400">R$ ${sub.toFixed(2)}</td>
+                        <td class="p-3 text-right">
+                            <button onclick="removeOrderItem('${item.code}')" class="p-1.5 bg-rose-500/20 hover:bg-rose-500/30 rounded-lg text-rose-400 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            const subtotal = order.items.reduce((acc, i) => acc + (i.price * i.quantity), 0);
+            const serviceFeeVal = subtotal * (state.serviceFee / 100);
+            const grandTotal = subtotal + serviceFeeVal;
+
+            document.getElementById('order-subtotal').textContent = `R$ ${subtotal.toFixed(2)}`;
+            document.getElementById('order-service-fee-pct').textContent = state.serviceFee;
+            document.getElementById('order-service-fee-val').textContent = `R$ ${serviceFeeVal.toFixed(2)}`;
+            document.getElementById('order-grand-total').textContent = `R$ ${grandTotal.toFixed(2)}`;
+            lucide.createIcons();
+        }
+
+        function finalizeCurrentOrder() {
+            const order = state.orders.find(o => o.id === state.currentDetailOrderId);
+            if (!order) return;
+            if (order.items.length === 0) return showToast('Adicione itens antes de fechar a conta.', 'error');
+
+            if (confirm(`Deseja fechar a conta da comanda "${order.tableOrClient}"? Ela será movida para o histórico.`)) {
+                order.status = 'fechado';
+                order.closedAt = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                saveState();
+                closeModal('modal-order-details');
+                renderAll();
+                showToast(`Conta de "${order.tableOrClient}" fechada com sucesso!`);
+            }
+        }
+
+        function deleteOrder(orderId) {
+            if (confirm('Deseja excluir esta comanda permanentemente?')) {
+                state.orders = state.orders.filter(o => o.id !== orderId);
+                saveState();
+                renderAll();
+                showToast('Comanda excluída.');
+            }
+        }
+
+        function printOrderReceipt() {
+            const order = state.orders.find(o => o.id === state.currentDetailOrderId);
+            if (!order) return;
+
+            const subtotal = order.items.reduce((acc, i) => acc + (i.price * i.quantity), 0);
+            const serviceFeeVal = subtotal * (state.serviceFee / 100);
+            const grandTotal = subtotal + serviceFeeVal;
+
+            let printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Conferência de Conta - ${order.tableOrClient}</title>
+                    <style>
+                        body { font-family: monospace; padding: 20px; color: #000; max-width: 300px; margin: auto; }
+                        h2, h3 { text-align: center; margin: 5px 0; }
+                        hr { border-top: 1px dashed #000; margin: 10px 0; }
+                        .item-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 13px; }
+                        .total-row { display: flex; justify-content: space-between; font-weight: bold; margin-top: 8px; font-size: 14px; }
+                    </style>
+                </head>
+                <body>
+                    <h2>GARÇOM EXCELLINGTON</h2>
+                    <h3>A conta, por favor!</h3>
+                    <p><strong>Comanda/Mesa:</strong> ${order.tableOrClient}<br>
+                    <strong>Data:</strong> ${order.date} às ${order.time}</p>
+                    <hr>
+                    <div>
+                        ${order.items.map(i => `
+                            <div class="item-row">
+                                <span>${i.quantity}x ${i.name}</span>
+                                <span>R$ ${(i.price * i.quantity).toFixed(2)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <hr>
+                    <div class="item-row"><span>Subtotal:</span> <span>R$ ${subtotal.toFixed(2)}</span></div>
+                    <div class="item-row"><span>Taxa Serviço (${state.serviceFee}%):</span> <span>R$ ${serviceFeeVal.toFixed(2)}</span></div>
+                    <div class="total-row"><span>TOTAL GERAL:</span> <span>R$ ${grandTotal.toFixed(2)}</span></div>
+                    <hr>
+                    <p style="text-align: center; font-size: 11px;">Obrigado pela preferência!<br>Volte sempre.</p>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => { printWindow.print(); }, 500);
+        }
+
+        function shareOrderWhatsApp() {
+            const order = state.orders.find(o => o.id === state.currentDetailOrderId);
+            if (!order) return;
+
+            const subtotal = order.items.reduce((acc, i) => acc + (i.price * i.quantity), 0);
+            const serviceFeeVal = subtotal * (state.serviceFee / 100);
+            const grandTotal = subtotal + serviceFeeVal;
+
+            let text = `📋 *GARÇOM EXCELLINGTON*\n`;
+            text += `*Comanda / Mesa:* ${order.tableOrClient}\n`;
+            text += `*Data/Hora:* ${order.date} às ${order.time}\n`;
+            text += `----------------------------------\n`;
+            if (order.items.length === 0) {
+                text += `_(Nenhum item lançado)_\n`;
+            } else {
+                order.items.forEach(i => {
+                    text += `${i.quantity}x ${i.name} — R$ ${(i.price * i.quantity).toFixed(2)}\n`;
+                });
+            }
+            text += `----------------------------------\n`;
+            text += `Subtotal: R$ ${subtotal.toFixed(2)}\n`;
+            text += `Taxa de Serviço (${state.serviceFee}%): R$ ${serviceFeeVal.toFixed(2)}\n`;
+            text += `*TOTAL GERAL: R$ ${grandTotal.toFixed(2)}*\n`;
+            text += `_Gerado por Garçom Excellington_`;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: `Comanda - ${order.tableOrClient}`,
+                    text: text
+                }).catch(() => {
+                    openWhatsAppText(text);
+                });
+            } else {
+                openWhatsAppText(text);
+            }
+        }
+
+        function openWhatsAppText(text) {
+            const encoded = encodeURIComponent(text);
+            const whatsappUrl = `https://api.whatsapp.com/send?text=${encoded}`;
+            
+            const dummy = document.createElement('textarea');
+            document.body.appendChild(dummy);
+            dummy.value = text;
+            dummy.select();
+            document.execCommand('copy');
+            document.body.removeChild(dummy);
+
+            showToast('Resumo copiado e abrindo WhatsApp!');
+            window.open(whatsappUrl, '_blank');
+        }
+
+        // --- HISTORY MANAGEMENT ---
+        function renderHistory() {
+            const container = document.getElementById('history-orders-list');
+            const search = document.getElementById('history-search').value.toLowerCase();
+            container.innerHTML = '';
+
+            const closedOrders = state.orders.filter(o => o.status === 'fechado' && o.tableOrClient.toLowerCase().includes(search));
+
+            if (closedOrders.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-slate-800/40 border border-slate-700/60 rounded-2xl p-10 text-center space-y-3">
+                        <div class="inline-flex bg-slate-800 p-3 rounded-full text-slate-400"><i data-lucide="history" class="w-8 h-8"></i></div>
+                        <p class="text-slate-300 font-medium">Nenhum histórico de comanda fechada encontrado.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            closedOrders.forEach(order => {
+                const subtotal = order.items.reduce((acc, i) => acc + (i.price * i.quantity), 0);
+                const serviceFeeVal = subtotal * (state.serviceFee / 100);
+                const grandTotal = subtotal + serviceFeeVal;
+
+                const div = document.createElement('div');
+                div.className = "bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4";
+                div.innerHTML = `
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-base font-bold text-white flex items-center gap-1.5">
+                                <i data-lucide="check-circle" class="text-emerald-400 w-4 h-4"></i> ${order.tableOrClient}
+                            </h3>
+                            <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs px-2 py-0.5 rounded-full font-medium">Fechado</span>
+                        </div>
+                        <p class="text-xs text-slate-400">Aberto às ${order.time} | Fechado às ${order.closedAt || 'N/D'} (${order.date})</p>
+                        <p class="text-xs text-slate-300">${order.items.length} tipo(s) de item(ns) consumido(s)</p>
+                    </div>
+                    <div class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 pt-3 md:pt-0 border-slate-700">
+                        <div class="text-right">
+                            <span class="text-xs text-slate-400 block">Total com Serviço</span>
+                            <span class="text-lg font-bold text-amber-400">R$ ${grandTotal.toFixed(2)}</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="reopenOrder('${order.id}')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-2 rounded-xl text-xs font-medium transition flex items-center gap-1" title="Reabrir Comanda">
+                                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reabrir
+                            </button>
+                            <button onclick="deleteOrder('${order.id}')" class="bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 p-2 rounded-xl transition" title="Excluir">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+            lucide.createIcons();
+        }
+
+        function reopenOrder(orderId) {
+            const order = state.orders.find(o => o.id === orderId);
+            if (!order) return;
+
+            if (confirm(`Deseja reabrir a comanda "${order.tableOrClient}"?`)) {
+                order.status = 'aberto';
+                delete order.closedAt;
+                saveState();
+                renderAll();
+                showToast('Comanda reaberta com sucesso!');
+                switchTab('orders');
+            }
+        }
+    </script>
+</body>
+</html>
