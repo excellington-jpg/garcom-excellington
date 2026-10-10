@@ -1,4 +1,3 @@
-﻿
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -33,30 +32,22 @@
                         <p class="text-xs text-amber-400 font-medium">A conta, por favor!</p>
                     </div>
 
-
-                        <div class="flex items-center gap-2 mt-0.5">
+                    <div class="flex items-center gap-2 mt-0.5">
                         <span id="user-display-tag" class="text-xs font-semibold text-indigo-300 hidden"></span>
-      <button onclick="openUsernameModal()" class="text-[10px] text-indigo-400 hover:text-indigo-300 underline hidden" id="edit-user-btn">Editar</button>
-     
-                        </div>
-                    
-
-
-                    
+                        <button onclick="openUsernameModal()" class="text-[10px] text-indigo-400 hover:text-indigo-300 underline hidden" id="edit-user-btn">Editar</button>
+                    </div>
                 </div>
+
                 <!-- Terms and Exit action icons below title and subtitle -->
                 <div class="flex items-center space-x-2 pl-11">
                     <button onclick="openModal('modal-terms')" title="Termos de Uso e Responsabilidade" class="px-3 py-1 bg-slate-900/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg border border-slate-700 transition flex items-center gap-1.5 text-xs font-medium">
                         <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-400"></i> Termos de Uso
                     </button>
 
-
                     <!-- Ícone Ativação Pix -->
-                <button onclick="toggleActivationModal()" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-emerald-400 rounded-xl text-xs font-medium border border-slate-800 transition" title="Renovação Mensal Pix">
-                    <i class="fa-solid fa-key"></i>
-                </button>
-
-
+                    <button onclick="openActivationModal(false)" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-emerald-400 rounded-xl text-xs font-medium border border-slate-800 transition" title="Renovação Mensal Pix">
+                        <i data-lucide="key" class="w-3.5 h-3.5"></i> Ativação Pix
+                    </button>
                     
                     <button onclick="exitApp()" title="Sair do Aplicativo" class="px-3 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 rounded-lg border border-rose-500/30 transition flex items-center gap-1.5 text-xs font-medium">
                         <i data-lucide="power" class="w-3.5 h-3.5"></i> Sair / Fechar
@@ -141,7 +132,7 @@
                 </div>
             </div>
 
-            <!-- Categories Management Section (Button above text box) -->
+            <!-- Categories Management Section -->
             <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-lg">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                     <div>
@@ -401,13 +392,11 @@
         </div>
     </div>
 
-
-
-        <!-- MODAL: Cadastro de Usuário -->
+    <!-- MODAL: Cadastro de Usuário -->
     <div id="username-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-sm w-full flex flex-col shadow-2xl">
             <h3 class="text-lg font-bold mb-1 text-white flex items-center gap-2">
-                <i class="fa-solid fa-user text-indigo-400"></i> Identificação do Usuário
+                <i data-lucide="user" class="text-indigo-400 w-5 h-5"></i> Identificação do Usuário
             </h3>
             <p class="text-xs text-slate-400 mb-4">Informe seu nome para registrar o licenciamento de uso.</p>
             <form onsubmit="handleUsernameSubmit(event)" class="space-y-3">
@@ -429,10 +418,10 @@
         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-sm w-full flex flex-col max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl">
             <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
                 <h3 class="font-bold text-emerald-400 text-base flex items-center gap-2">
-                    <i class="fa-solid fa-heart text-emerald-500"></i> Renovação Mensal Pix
+                    <i data-lucide="heart" class="text-emerald-500 w-4 h-4"></i> Renovação Mensal Pix
                 </h3>
-                <button onclick="toggleActivationModal()" class="text-slate-400 hover:text-white p-1">
-                    <i class="fa-solid fa-xmark text-lg"></i>
+                <button id="activation-close-btn" onclick="toggleActivationModal()" class="text-slate-400 hover:text-white p-1">
+                    <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
             
@@ -456,12 +445,12 @@
                 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Chave Pix (Celular)</span>
                 <input id="pix-key-input" readonly value="16250510850" class="w-full bg-slate-900 border border-slate-800 text-center font-mono text-emerald-400 text-xs py-2 px-3 rounded-lg outline-none select-all">
                 <button onclick="copyPixKey()" id="copy-pix-btn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20">
-                    <i class="fa-solid fa-copy"></i> Copiar Chave Pix
+                    <i data-lucide="copy" class="w-4 h-4"></i> Copiar Chave Pix
                 </button>
             </div>
 
             <div class="space-y-2 pt-1 border-t border-slate-800">
-                <label class="block text-xs font-medium text-slate-300">Código de Ativação (10 dígitos):</label>
+                <label class="block text-xs font-medium text-slate-300">Código de Ativação (Gerado pelo Admin):</label>
                 <input type="text" id="activation-code-input" placeholder="Digite o código de liberação" class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 text-white text-xs rounded-lg p-2.5 font-mono outline-none">
                 <button onclick="validateActivationCode()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-2.5 rounded-lg transition-all shadow-md shadow-indigo-600/30">
                     Ativar Aplicativo
@@ -469,10 +458,6 @@
             </div>
         </div>
     </div>
-    
-
-
-    
 
     <!-- Toast Notification -->
     <div id="toast" class="fixed bottom-5 right-5 bg-slate-800 border border-slate-700 text-white px-4 py-3 rounded-xl shadow-2xl z-50 flex items-center gap-3 transition-all duration-300 translate-y-20 opacity-0 pointer-events-none">
@@ -482,12 +467,11 @@
 
     <!-- JavaScript Application Logic -->
     <script>
-
-
-                // --- CONSTANTES DE ARMAZENAMENTO E LICENCIAMENTO ---
+        // --- CONSTANTES DE ARMAZENAMENTO E LICENCIAMENTO ---
         const USERNAME_KEY = 'excellington_garcom_username_v1';
         const EXPIRATION_KEY = 'excellington_garcom_expiration_v1';
         const PIX_KEY = '16250510850';
+        let isAppForcedBlocked = false;
 
         window.addEventListener('DOMContentLoaded', () => {
             checkAppAccess();
@@ -503,7 +487,6 @@
                 return;
             }
 
-            // Exibir nome do usuário abaixo do subtítulo
             const userTag = document.getElementById('user-display-tag');
             const editBtn = document.getElementById('edit-user-btn');
             userTag.textContent = `• Usuário: ${username}`;
@@ -514,8 +497,108 @@
             const now = Date.now();
 
             if (!expiration || now > parseInt(expiration)) {
-                toggleActivationModal();
+                openActivationModal(true); // Bloqueio forçado por expiração
             }
+        }
+
+        function openActivationModal(forced = false) {
+            isAppForcedBlocked = forced;
+            const modal = document.getElementById('activation-modal');
+            const closeBtn = document.getElementById('activation-close-btn');
+            
+            if (closeBtn) {
+                if (forced) {
+                    closeBtn.classList.add('hidden'); // Oculta o botão de fechar se expirado
+                } else {
+                    closeBtn.classList.remove('hidden'); // Exibe se aberto manualmente
+                }
+            }
+            modal.classList.remove('hidden');
+            updateActivationInfo();
+        }
+
+        function toggleActivationModal() {
+            if (isAppForcedBlocked) return; // Impede fechar se o app estiver bloqueado
+            const modal = document.getElementById('activation-modal');
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) {
+                isAppForcedBlocked = false;
+                const closeBtn = document.getElementById('activation-close-btn');
+                if (closeBtn) closeBtn.classList.remove('hidden');
+                updateActivationInfo();
+            }
+        }
+
+        function updateActivationInfo() {
+            const username = localStorage.getItem(USERNAME_KEY) || 'Não cadastrado';
+            document.getElementById('activation-display-username').textContent = username;
+
+            const expirationVal = localStorage.getItem(EXPIRATION_KEY);
+            const expEl = document.getElementById('activation-display-expiration');
+
+            if (expirationVal) {
+                const expDate = new Date(parseInt(expirationVal));
+                expEl.textContent = expDate.toLocaleDateString('pt-BR', {
+                    day: '2-digit', month: '2-digit', year: 'numeric'
+                });
+            } else {
+                expEl.textContent = 'Não definido';
+            }
+        }
+
+        function copyPixKey() {
+            const input = document.getElementById('pix-key-input');
+            const btn = document.getElementById('copy-pix-btn');
+            input.select();
+            document.execCommand('copy');
+            btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> Chave Pix Copiada!';
+            lucide.createIcons();
+            setTimeout(() => {
+                btn.innerHTML = '<i data-lucide="copy" class="w-4 h-4"></i> Copiar Chave Pix';
+                lucide.createIcons();
+            }, 1500);
+        }
+
+        function validateActivationCode() {
+            const codeInput = document.getElementById('activation-code-input').value.trim();
+            const username = localStorage.getItem(USERNAME_KEY) || '';
+            const cleanName = username.replace(/\s+/g, '');
+            const charCount = cleanName.length;
+
+            // Alinhando o cálculo da data com o gerador com base na expiração atual ou data atual
+            const currentExp = localStorage.getItem(EXPIRATION_KEY);
+            const baseDate = (currentExp && parseInt(currentExp) > Date.now()) ? new Date(parseInt(currentExp)) : new Date();
+            
+            const targetDate = new Date(baseDate);
+            targetDate.setDate(targetDate.getDate() + 30);
+
+            const day = targetDate.getDate();
+            const month = targetDate.getMonth() + 1;
+            const year = targetDate.getFullYear();
+
+            const sum = charCount + day + month + year;
+            const expectedCode = String(Math.pow(sum, 3)); // Sem padStart para bater com o gerador
+
+            if (codeInput === expectedCode || codeInput === "1234567890") {
+                localStorage.setItem(EXPIRATION_KEY, targetDate.getTime().toString());
+                isAppForcedBlocked = false;
+                document.getElementById('activation-modal').classList.add('hidden');
+                alert("Aplicativo ativado com sucesso por mais 30 dias!");
+                checkAppAccess();
+            } else {
+                alert("Código de ativação inválido. Verifique o comprovante enviado para excellington@gmail.com.");
+            }
+        }
+
+        function checkAccessBeforeAction() {
+            const expiration = localStorage.getItem(EXPIRATION_KEY);
+            const now = Date.now();
+            if (!expiration || now > parseInt(expiration)) {
+                openActivationModal(true);
+                showToast("Licença expirada. Renove para continuar.", "error");
+                return false;
+            }
+            return true;
         }
 
         function openUsernameModal() {
@@ -546,80 +629,16 @@
             checkAppAccess();
         }
 
-        function toggleActivationModal() {
-            const modal = document.getElementById('activation-modal');
-            modal.classList.toggle('hidden');
-            if (!modal.classList.contains('hidden')) {
-                updateActivationInfo();
-            }
-        }
-
-        function updateActivationInfo() {
-            const username = localStorage.getItem(USERNAME_KEY) || 'Não cadastrado';
-            document.getElementById('activation-display-username').textContent = username;
-
-            const expirationVal = localStorage.getItem(EXPIRATION_KEY);
-            const expEl = document.getElementById('activation-display-expiration');
-
-            if (expirationVal) {
-                const expDate = new Date(parseInt(expirationVal));
-                expEl.textContent = expDate.toLocaleDateString('pt-BR', {
-                    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                });
-            } else {
-                expEl.textContent = 'Não definido';
-            }
-        }
-
-        function copyPixKey() {
-            const input = document.getElementById('pix-key-input');
-            const btn = document.getElementById('copy-pix-btn');
-            input.select();
-            document.execCommand('copy');
-            btn.innerHTML = '<i class="fa-solid fa-check"></i> Chave Pix Copiada!';
-            setTimeout(() => {
-                btn.innerHTML = '<i class="fa-solid fa-copy"></i> Copiar Chave Pix';
-            }, 1500);
-        }
-
-        function validateActivationCode() {
-            const codeInput = document.getElementById('activation-code-input').value.trim();
-            const username = localStorage.getItem(USERNAME_KEY) || '';
-            const cleanName = username.replace(/\s+/g, '');
-            const charCount = cleanName.length;
-
-            const targetDate = new Date();
-            targetDate.setDate(targetDate.getDate() + 30);
-            const day = targetDate.getDate();
-            const month = targetDate.getMonth() + 1;
-            const year = targetDate.getFullYear();
-
-            const sum = charCount + day + month + year;
-            const expectedCode = Math.pow(sum, 3).toString().padStart(10, '0');
-
-            if (codeInput === expectedCode || codeInput === "1234567890") {
-                localStorage.setItem(EXPIRATION_KEY, targetDate.getTime().toString());
-                document.getElementById('activation-modal').classList.add('hidden');
-                alert("Aplicativo ativado com sucesso por mais 30 dias!");
-                checkAppAccess();
-            } else {
-                alert("Código de ativação inválido. Verifique o comprovante enviado para excellington@gmail.com.");
-            }
-                    }
-
-
-        
         const STORAGE_KEY = 'exc_garcom_state_v3';
 
         let state = {
             serviceFee: 10,
             categories: ['Prato', 'Bebida', 'Sobremesa', 'Outros'],
-            menu: [], // Starts strictly empty for new users
-            orders: [], // Active and completed orders
+            menu: [], 
+            orders: [], 
             currentDetailOrderId: null
         };
 
-        // Load State from LocalStorage
         function loadState() {
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
@@ -638,12 +657,10 @@
             document.getElementById('service-fee-input').value = state.serviceFee;
         }
 
-        // Save State to LocalStorage
         function saveState() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         }
 
-        // Initialize Lucide icons and app on load
         window.onload = function() {
             loadState();
             lucide.createIcons();
@@ -658,8 +675,8 @@
             lucide.createIcons();
         }
 
-        // Tab Switching
         function switchTab(tabId) {
+            if (!checkAccessBeforeAction()) return;
             ['orders', 'menu', 'history'].forEach(id => {
                 const el = document.getElementById(`tab-${id}`);
                 const btn = document.getElementById(`btn-tab-${id}`);
@@ -674,7 +691,6 @@
             lucide.createIcons();
         }
 
-        // Toast notification helper
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             const icon = document.getElementById('toast-icon');
@@ -692,11 +708,13 @@
             }, 3000);
         }
 
-        // Modals helper
-        function openModal(id) { document.getElementById(id).classList.remove('hidden'); lucide.createIcons(); }
+        function openModal(id) { 
+            if (!checkAccessBeforeAction()) return;
+            document.getElementById(id).classList.remove('hidden'); 
+            lucide.createIcons(); 
+        }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-        // Exit application function
         function exitApp() {
             if (confirm("Deseja realmente sair e encerrar a sessão do Garçom Excellington?")) {
                 try {
@@ -729,7 +747,6 @@
             if (selectItemCat) selectItemCat.innerHTML = '';
 
             state.categories.forEach((cat, index) => {
-                // Badge in manager
                 if (container) {
                     const badge = document.createElement('div');
                     badge.className = "bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-xl flex items-center gap-2 text-sm text-slate-200";
@@ -741,7 +758,6 @@
                     container.appendChild(badge);
                 }
 
-                // Option in menu modal select
                 if (selectItemCat) {
                     const opt = document.createElement('option');
                     opt.value = cat;
@@ -753,6 +769,7 @@
         }
 
         function addCategory() {
+            if (!checkAccessBeforeAction()) return;
             const input = document.getElementById('new-category-name');
             const name = input.value.trim();
             if (!name) return showToast('Digite o nome da classe.', 'error');
@@ -766,6 +783,7 @@
         }
 
         function editCategory(index) {
+            if (!checkAccessBeforeAction()) return;
             const oldName = state.categories[index];
             const newName = prompt('Editar nome da classe:', oldName);
             if (newName && newName.trim() !== '' && newName.trim() !== oldName) {
@@ -783,6 +801,7 @@
         }
 
         function deleteCategory(index) {
+            if (!checkAccessBeforeAction()) return;
             const cat = state.categories[index];
             if (state.categories.length <= 1) return showToast('Mantenha pelo menos uma classe.', 'error');
             if (confirm(`Deseja excluir a classe "${cat}"? Itens vinculados passarão para "Outros".`)) {
@@ -799,6 +818,7 @@
 
         // --- MENU ITEMS MANAGEMENT ---
         function saveServiceFee() {
+            if (!checkAccessBeforeAction()) return;
             const val = parseFloat(document.getElementById('service-fee-input').value);
             if (isNaN(val) || val < 0) return showToast('Valor de taxa inválido.', 'error');
             state.serviceFee = val;
@@ -842,6 +862,7 @@
         }
 
         function openMenuItemModal(index = null) {
+            if (!checkAccessBeforeAction()) return;
             renderCategoriesManager();
             document.getElementById('menu-edit-index').value = index !== null ? index : '';
             if (index !== null) {
@@ -860,6 +881,7 @@
 
         function saveMenuItemModal(e) {
             e.preventDefault();
+            if (!checkAccessBeforeAction()) return;
             const editIdx = document.getElementById('menu-edit-index').value;
             const code = document.getElementById('item-code').value.trim();
             const name = document.getElementById('item-name').value.trim();
@@ -883,6 +905,7 @@
         }
 
         function deleteMenuItem(index) {
+            if (!checkAccessBeforeAction()) return;
             if (confirm(`Deseja excluir o item "${state.menu[index].name}"?`)) {
                 state.menu.splice(index, 1);
                 saveState();
@@ -893,6 +916,7 @@
 
         // --- EXCEL IMPORT / TEMPLATE ---
         function downloadExcelTemplate() {
+            if (!checkAccessBeforeAction()) return;
             const templateData = [
                 { Código: "P01", Tipo: "Prato", Nome: "Filé Parmegiana com Fritas", Valor: 68.90 },
                 { Código: "P02", Tipo: "Prato", Nome: "Picanha ao Forno", Valor: 89.90 },
@@ -908,6 +932,7 @@
         }
 
         function handleExcelImport(e) {
+            if (!checkAccessBeforeAction()) return;
             const file = e.target.files[0];
             if (!file) return;
 
@@ -955,6 +980,7 @@
 
         // --- ORDERS MANAGEMENT ---
         function openNewOrderModal() {
+            if (!checkAccessBeforeAction()) return;
             document.getElementById('form-order').reset();
             document.getElementById('order-id-edit').value = '';
             document.getElementById('order-modal-title').innerHTML = `<i data-lucide="plus-circle" class="text-amber-400 w-5 h-5"></i> Abrir Nova Comanda`;
@@ -963,6 +989,7 @@
 
         function saveOrderModal(e) {
             e.preventDefault();
+            if (!checkAccessBeforeAction()) return;
             const tableClient = document.getElementById('order-table-client').value.trim();
             const now = new Date();
             const dateStr = now.toLocaleDateString('pt-BR');
@@ -1022,7 +1049,7 @@
                         </p>
                         <div class="bg-slate-900/60 rounded-xl p-3 border border-slate-700/60 text-xs space-y-1 mb-3 max-h-32 overflow-y-auto">
                             ${order.items.length === 0 ? '<span class="text-slate-500 italic">Nenhum item adicionado ainda.</span>' : 
-                                order.items.map(i => `<div class="flex justify-between text-slate-300"><span>${i.quantity}x ${i.name}</span> <span class="font-medium">R$ ${(i.price * i.quantity).toFixed(2)}</span></div>`).join('')}
+                                order.items.map(i => `<div class="flex justify-between text-slate-300"><span>${i.quantity}x${i.name}</span> <span class="font-medium">R$ ${(i.price * i.quantity).toFixed(2)}</span></div>`).join('')}
                         </div>
                     </div>
                     <div class="space-y-3 pt-2 border-t border-slate-700">
@@ -1046,6 +1073,7 @@
         }
 
         function openOrderDetails(orderId) {
+            if (!checkAccessBeforeAction()) return;
             state.currentDetailOrderId = orderId;
             const order = state.orders.find(o => o.id === orderId);
             if (!order) return;
@@ -1094,6 +1122,7 @@
         }
 
         function addItemToCurrentOrder() {
+            if (!checkAccessBeforeAction()) return;
             const order = state.orders.find(o => o.id === state.currentDetailOrderId);
             if (!order) return;
 
@@ -1124,6 +1153,7 @@
         }
 
         function updateOrderQuantity(code, delta) {
+            if (!checkAccessBeforeAction()) return;
             const order = state.orders.find(o => o.id === state.currentDetailOrderId);
             if (!order) return;
 
@@ -1140,6 +1170,7 @@
         }
 
         function removeOrderItem(code) {
+            if (!checkAccessBeforeAction()) return;
             const order = state.orders.find(o => o.id === state.currentDetailOrderId);
             if (!order) return;
 
@@ -1192,6 +1223,7 @@
         }
 
         function finalizeCurrentOrder() {
+            if (!checkAccessBeforeAction()) return;
             const order = state.orders.find(o => o.id === state.currentDetailOrderId);
             if (!order) return;
             if (order.items.length === 0) return showToast('Adicione itens antes de fechar a conta.', 'error');
@@ -1207,6 +1239,7 @@
         }
 
         function deleteOrder(orderId) {
+            if (!checkAccessBeforeAction()) return;
             if (confirm('Deseja excluir esta comanda permanentemente?')) {
                 state.orders = state.orders.filter(o => o.id !== orderId);
                 saveState();
@@ -1216,6 +1249,7 @@
         }
 
         function printOrderReceipt() {
+            if (!checkAccessBeforeAction()) return;
             const order = state.orders.find(o => o.id === state.currentDetailOrderId);
             if (!order) return;
 
@@ -1245,7 +1279,7 @@
                     <div>
                         ${order.items.map(i => `
                             <div class="item-row">
-                                <span>${i.quantity}x ${i.name}</span>
+                                <span>${i.quantity}x${i.name}</span>
                                 <span>R$ ${(i.price * i.quantity).toFixed(2)}</span>
                             </div>
                         `).join('')}
@@ -1265,6 +1299,7 @@
         }
 
         function shareOrderWhatsApp() {
+            if (!checkAccessBeforeAction()) return;
             const order = state.orders.find(o => o.id === state.currentDetailOrderId);
             if (!order) return;
 
@@ -1373,6 +1408,7 @@
         }
 
         function reopenOrder(orderId) {
+            if (!checkAccessBeforeAction()) return;
             const order = state.orders.find(o => o.id === orderId);
             if (!order) return;
 
